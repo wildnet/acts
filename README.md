@@ -1,4 +1,4 @@
-ACTS 1.3b3
+ACTS 1.3b3+wildNET
 ==========
 
 Another Calendar-based Tarsnap Script.
