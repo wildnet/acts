@@ -9,7 +9,7 @@ backuptargets="var etc home root"
 # tarsnap
 # What command to call for 'tarsnap'.
 # Default: tarsnap
-tarsnap="nice -n19 ionice -c3 tarsnap"
+tarsnap="/usr/bin/nice -n19 /usr/local/bin/tarsnap"
 
 # tarsnapbackupoptions
 # What options to use when backing up.
@@ -27,11 +27,12 @@ verbose=1
 # hostname
 # The machine name prefixed to created archives.
 # Default: $(hostname -s)
-#hostname=$(hostname)
+hostname=$(hostname)
 
 # uselocaltime
 # Use local time instead of UTC for the archive date and timestamps.
 # Default: 0 (i.e. use UTC)
+uselocaltime=0
 #uselocaltime=1
 
 # prebackupscript

@@ -5,7 +5,7 @@ set -u
 # Exit if a pipeline exits non-zero
 set -e
 
-VERSION="1.3b3"
+VERSION="1.3b3+wildNET"
 
 if [ "$#" = "1" ] && [ "$1" = "--version" ]; then
     echo "acts version $VERSION"
@@ -96,8 +96,12 @@ fi
 
 if [ "$uselocaltime" = 0 ]; then
     utc="-u"
+    #tz="_UTC"
+    tz=$(date -u "+%z%Z")
 elif [ "$uselocaltime" = 1 ]; then
     utc=""
+    #tz="_"$(date "+%Z")
+    tz=$(date "+%z%Z")
 else
     die "config-error message=\"invalid \$uselocaltime in acts.conf; valid options are 0 (for UTC) or 1 (for local time).\""
 fi
@@ -161,14 +165,15 @@ backuprc=0 # Notice any failed backups
 for dir in $backuptargets; do
     archive_starttime=$(date +%s)
     nicedirname=$(echo "$dir" | tr -d '/')
-    archivename="$hostname-$archivetype-$today-$nicedirname"
+    archivename="$hostname-$archivetype-$today$tz-$nicedirname"
     log_verbose "backup-start type=$archivetype dir=/$dir name=$archivename"
     # Uncontrolled expansion is bad, but we have little choice. See https://github.com/koalaman/shellcheck/wiki/Sc2086
     # shellcheck disable=SC2086
-    if ! output="$($tarsnap -c -f "$archivename" -C / $tarsnapbackupoptions "$dir" 2>&1)"; then
-        log_message "backup-error type=$archivetype dir=/$dir output=\"$(echo $output | tr '\n' " ")\""
+    if ! output="$($tarsnap -c -f "$archivename" -C / $tarsnapbackupoptions "$dir" 2>&1 | tr '\n' "-")"; then
+        log_message "backup-error type=$archivetype dir=/$dir output=\"$(echo $output | tr "-" " ")\""
         backuprc=1
     fi
+    log_verbose "backup-data type=$archivetype dir=/$dir size=\"Total Compressed $(echo $output | cut -d- -f5 | tr "-" " ")\""
     archive_endtime=$(date +%s)
     log_verbose "backup-finish type=$archivetype dir=/$dir duration=$((archive_endtime - archive_starttime))s"
 done
